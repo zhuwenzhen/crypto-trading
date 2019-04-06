@@ -1,0 +1,2 @@
+# crypto-trading
+for fun
