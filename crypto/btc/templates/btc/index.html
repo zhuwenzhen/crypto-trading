@@ -1,0 +1,253 @@
+{% extends 'btc/layout.html' %}
+
+{% block charts %}
+
+var endpoint = '/btc/api/chart'
+var defaultData = []
+var labels = [];
+var price = [];
+var predictPrice=[];
+var askList=[];
+var bidList=[];
+var times =[];
+var mychart = 0;
+var numCalled = 0;
+var gaussian = false;
+var GBPrice =[];
+var GBUPrice =[];
+var GBLPrice =[];
+
+
+$.ajax({
+    method: "GET",
+    url: endpoint,
+    success: function(data){
+        labels = data.labels
+        defaultData = data.default
+        price = data.price
+        times = data.time
+        askList=data.ask
+        bidList=data.bid
+
+        predictPrice=data.predict
+        GBPrice = data.gbpredict
+        GBUPrice = data.gbupredict
+        GBLPrice = data.gblpredict
+        
+        drawChart()
+        updateAskList()
+        updateBidList()
+        updatePriceHeading()
+    },
+    error: function(error_data){
+        console.log("error")
+        console.log(error_data)
+    }
+})
+
+window.setInterval(function(){
+    $.ajax({
+        method: "GET",
+        url: endpoint,
+        success: function(data){
+            labels = data.labels
+            defaultData = data.default
+            price = data.price
+            times = data.time
+            askList=data.ask
+            bidList=data.bid
+
+            predictPrice=data.predict
+            GBPrice = data.gbpredict
+            GBUPrice = data.gbupredict
+            GBLPrice = data.gblpredict
+
+            drawChart()
+            updateAskList()
+            updateBidList()
+            updatePriceHeading()
+
+        },
+        error: function(error_data){
+            console.log("error")
+            console.log(error_data)
+        }
+    })
+},10000)
+
+
+function drawChart(){
+    var hiddenDatasets = [false, false];
+    if(numCalled > 0){
+        for(var i=0; i<myChart.data.datasets.length; i++) {
+            if (!myChart.isDatasetVisible(i)) {
+                hiddenDatasets[i] = true;
+            }
+        }
+        myChart.destroy();
+    }
+    numCalled = 1;
+    var ctx = document.getElementById('myChart').getContext('2d');
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: times,
+            datasets: [{
+                label: "Bitcoin price",
+                fill: false,
+                hidden:hiddenDatasets[0],
+                lineTension: 0.1,
+                backgroundColor: "rgba(225,0,0,0.4)",
+                borderColor: "red", // The main line color
+                borderCapStyle: 'square',
+                borderDash: [], // try [5, 15] for instance
+                borderDashOffset: 0.0,
+                borderJoinStyle: 'miter',
+                pointBorderColor: "black",
+                pointBackgroundColor: "white",
+                pointBorderWidth: 1,
+                pointHoverRadius: 8,
+                pointHoverBackgroundColor: "yellow",
+                pointHoverBorderColor: "brown",
+                pointHoverBorderWidth: 2,
+                pointRadius: 4,
+                pointHitRadius: 5,
+                // notice the gap in the data and the spanGaps: true
+                data: price,
+                spanGaps: true,
+                }, {
+                label: "Gaussian predicted price",
+                fill: false,
+                hidden: hiddenDatasets[1],
+                lineTension: 0.1,
+                backgroundColor: "rgba(167,105,0,0.4)",
+                borderColor: "rgb(167, 105, 0)",
+                borderCapStyle: 'butt',
+                borderDash: [],
+                borderDashOffset: 0.0,
+                borderJoinStyle: 'miter',
+                pointBorderColor: "white",
+                pointBackgroundColor: "black",
+                pointBorderWidth: 1,
+                pointHoverRadius: 8,
+                pointHoverBackgroundColor: "brown",
+                pointHoverBorderColor: "yellow",
+                pointHoverBorderWidth: 2,
+                pointRadius: 4,
+                pointHitRadius: 5,
+                // notice the gap in the data and the spanGaps: false
+                data: GBPrice,
+                spanGaps: false,
+                }, {
+                label: "Confidence interval upper-bound",
+                fill: '+1',
+                hidden: hiddenDatasets[2],
+                lineTension: 0.1,
+                backgroundColor: "rgba( 59, 143, 250 ,0.4)",
+                borderColor: "rgb(167, 105, 0)",
+                borderCapStyle: 'butt',
+                borderDash: [],
+                borderDashOffset: 0.0,
+                borderJoinStyle: 'miter',
+                pointBorderColor: "white",
+                pointBackgroundColor: "black",
+                pointBorderWidth: 1,
+                pointHoverRadius: 8,
+                pointHoverBackgroundColor: "brown",
+                pointHoverBorderColor: "yellow",
+                pointHoverBorderWidth: 2,
+                pointRadius: 4,
+                pointHitRadius: 5,
+                // notice the gap in the data and the spanGaps: false
+                data: GBUPrice,
+                spanGaps: false,
+                },{
+                label: "Confidence interval lower-bound",
+                fill: '-1',
+                hidden: hiddenDatasets[3],
+                lineTension: 0.1,
+                backgroundColor: "rgba( 59, 143, 250 ,0.4)",
+                borderColor: "rgb(167, 105, 0)",
+                borderCapStyle: 'butt',
+                borderDash: [],
+                borderDashOffset: 0.0,
+                borderJoinStyle: 'miter',
+                pointBorderColor: "white",
+                pointBackgroundColor: "black",
+                pointBorderWidth: 1,
+                pointHoverRadius: 8,
+                pointHoverBackgroundColor: "brown",
+                pointHoverBorderColor: "yellow",
+                pointHoverBorderWidth: 2,
+                pointRadius: 4,
+                pointHitRadius: 5,
+                // notice the gap in the data and the spanGaps: false
+                data: GBLPrice,
+                spanGaps: false,
+                }
+            ]
+            
+        },
+        options: {
+            responsive: false,
+            animation: false,
+            maintainAspectRatio: true,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: false
+                    }
+                }]
+            }
+        }
+    }); 
+}
+
+
+function updateAskList(){
+    var list = document.getElementById('askArea');
+    list.innerHTML = "";
+    askList.forEach(function(element){
+        var entry = document.createElement('li');
+        entry.appendChild(document.createTextNode(element));
+        list.appendChild(entry);
+    })
+}
+
+function updateBidList(){
+    var list = document.getElementById('bidArea');
+    list.innerHTML = "";
+    bidList.forEach(function(element){
+        var entry = document.createElement('li');
+        entry.appendChild(document.createTextNode(element));
+        list.appendChild(entry);
+    })
+}
+
+function updatePriceHeading(){
+    var heading = document.getElementById('curPrice');
+    heading.innerHTML = "                 Current Bitcoin Price: " + price[price.length - 1];
+    var secondHeading = document.getElementById('predPrice');
+    var thirdHeading = document.getElementById('confInt');
+    if(GBPrice[GBPrice.length - 1] == null){
+            secondHeading.innerHTML = "                 Predicted Bitcoin Price: " + GBPrice[GBPrice.length - 2];
+            thirdHeading.innerHTML="Confidence interval Price Range: " + GBLPrice[GBLPrice.length -2] + " to " + GBUPrice[GBUPrice.length -2];
+    }
+    else{
+        secondHeading.innerHTML = "                 Predicted Bitcoin Price: " + GBPrice[GBPrice.length - 1];
+                    thirdHeading.innerHTML="Confidence interval Price Range: " + GBLPrice[GBLPrice.length -1] + " to " + GBUPrice[GBUPrice.length -1];
+
+    }
+}
+
+function showGaussian(){
+    gaussian = true;
+    console.log("we hit gaussian true");
+}
+
+function showLinear(){
+    gaussian = false;
+}
+
+
+{% endblock charts %}

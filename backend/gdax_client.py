@@ -1,4 +1,4 @@
-import grequests
+import requests
 import logging
 import os
 import glob
@@ -35,7 +35,8 @@ class GdaxClient:
         time_url = self.url + '/time'
         ticker_url = self.url + '/products/{}/ticker'.format(self.product_id)
         order_book_url = self.url + '/products/{}/book?level=2'.format(self.product_id)
-        return [grequests.get(i, timeout=1.0) for i in time_url, ticker_url, order_book_url]
+        # return [requests.get(i, timeout=1.0) for i in time_url, ticker_url, order_book_url]
+        return [requests.get(i, timeout=1.0) for i in time_url]
 
     def __set_logger__(self):
         logger = logging.getLogger("gdax_client_logger")
@@ -67,7 +68,7 @@ class GdaxClient:
         self.logger.error("Request failed:", exc_info=1)
 
     def make_request(self):
-        time, ticker, order_book = grequests.map(self.requests, exception_handler=self.request_exception_handler)
+        time, ticker, order_book = requests.map(self.requests, exception_handler=self.request_exception_handler)
         time_json = time.json()
         ticker_json = ticker.json()
         orders_json = order_book.json()
@@ -99,7 +100,7 @@ class GdaxClient:
                   response['ticker']['volume'],
                   json.dumps(response['orders']['bids']),
                   json.dumps(response['orders']['asks'])]
-        print self.data_index, response['time']['iso']
+        print(self.data_index, response['time']['iso'])
         self.df.loc[self.data_index] = result
         self.data_index += 1
 

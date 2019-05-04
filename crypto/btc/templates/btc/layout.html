@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/chart.js@2.7.2/dist/Chart.bundle.min.js'></script>
+
+    <title>CryptoCurrency Visualizer</title>
+
+
+  </head>
+  <body>
+    <div class='container'>
+    <h1>
+    Bitcoin CryptoCurrency Visualizer
+    </h1>
+    </div>
+    <div>
+        <canvas id="myChart" width="1500" height="750"></canvas>
+    </div>
+
+    <div>
+        <div style="float: left">
+            <h3>Ask Volume</h3>
+            <ol type='1' id="askArea"></ol>
+        </div>
+        <div >
+        </div>
+        <div style= "float: right">
+            <h3>Bid Volume</h3>
+            <ol type='1' id="bidArea"></ol>
+        </div>
+    </div>
+    {% comment %} <div class="container">
+         <input type="button" id="gausbut" value="Show Gaussian Model" > 
+         <input type="button" id="linbut" value="Show Linear Regression Model" > 
+
+    </div> {% endcomment %}
+    <div class="container" >
+        <h3 id="curPrice" >               Current Bitcoin Price: </h3>
+        <h3 id="predPrice">               Predicted Bitcoin Price: </h3>
+        <h3 id="confInt">               Gaussian Price Range: </h3>
+    </div>
+ 
+    <script>
+        $(document).ready(function(){
+            {% block charts %}{% endblock charts %}
+        }) 
+    </script>
+  </body>
+</html>
